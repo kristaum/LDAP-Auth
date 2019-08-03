@@ -1,0 +1,12 @@
+---
+  - name: Configure LDAP on machine
+    hosts: 127.0.0.1
+    become: yes
+    gather_facts: yes
+    roles:
+      - role: roles/ldap_auth
+        vars:
+          ldapuri: ""
+          basedn: ""
+          binddn: ""
+          bindpw: ""

@@ -1,0 +1,38 @@
+ldap_version 3
+uid nslcd
+gid ldap
+
+bind_timelimit 10
+timelimit 10
+idle_timelimit 600
+
+uri ldap://{{ ldapuri }}:389/
+base {{ basedn }}
+
+ssl start_tls
+tls_reqcert allow
+tls_cacertdir /etc/openldap/cacerts
+tls_cacertfile /etc/openldap/cacerts/intermediate_svc.pem
+
+binddn {{ binddn }}
+bindpw {{ bindpw }}
+
+scope sub
+scope group sub
+scope hosts sub
+
+nss_initgroups_ignoreusers root,nslcd,bin,mail,nscd,ntp,daemon,nobody,postfix,sshd
+
+pagesize 1000
+referrals off
+
+filter passwd (|(memberOf=CN=G_Ecommerce_DEVOPS,OU=Seguranca,OU=COMPANYNAME,OU=Grupos,DC=COMPANYNAME,DC=CORP)(memberOf=CN=G_Ecommerce_DEV,OU=Seguranca,OU=COMPANYNAME,OU=Grupos,DC=COMPANYNAME,DC=CORP)(memberOf=CN=G_Ecommerce_SRE,OU=Seguranca,OU=COMPANYNAME,OU=Grupos,DC=COMPANYNAME,DC=CORP)(memberOf=CN=G_Ecommerce_DBA,OU=Seguranca,OU=COMPANYNAME,OU=Grupos,DC=COMPANYNAME,DC=CORP)(memberOf=CN=G_Ecommerce_QA,OU=Seguranca,OU=COMPANYNAME,OU=Grupos,DC=COMPANYNAME,DC=CORP))
+filter group (&(objectCategory=group)(gidNumber=*))
+
+map passwd uid sAMAccountName
+map passwd uidNumber uidNumber
+map passwd homeDirectory unixHomeDirectory
+map passwd gecos displayName
+map passwd loginShell "/bin/bash"
+map passwd gidNumber gidNumber
+map group gidNumber gidNumber

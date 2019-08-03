@@ -1,0 +1,19 @@
+#Files and its path that will be modified
+/etc/openldap/ldap.conf
+
+/etc/pam.d/system-auth-ac
+/etc/pam.d/password-auth-ac
+/etc/pam.d/fingerprint-auth-ac
+/etc/pam.d/smartcard-auth-ac
+/etc/pam.d/systemd-user
+/etc/pam.d/sshd
+
+/etc/krb5.conf
+/etc/nslcd.conf
+/etc/nsswitch.conf
+
+/etc/sudoers.d/*
+
+/etc/sysconfig/authconfig
+
+/etc/ssh/sshd_config

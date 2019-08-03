@@ -1,0 +1,113 @@
+---
+
+- name: Install packages pam_krb5 pam_ldap nscd nss-pam-ldapd oddjob oddjob-mkhomedir
+  yum:
+    name:
+      - pam_krb5
+      - pam_ldap
+      - nscd
+      - nss-pam-ldapd
+      - oddjob
+      - oddjob-mkhomedir
+
+- name: Enable services on boot
+  systemd:
+    name: "{{ item }}"
+    enabled: yes
+  with_items:
+    - 'nscd'
+    - 'nslcd'
+    - 'oddjobd'
+    - 'sshd'
+
+- name: Start services nscd nslcd oddjobd
+  systemd:
+    name: "{{ item }}"
+    state: started
+  with_items:
+    - 'nscd'
+    - 'nslcd'
+    - 'oddjobd'
+
+- name: Copy certificate
+  copy:
+    src: templates/etc/openldap/cacerts/intermediate_svc.pem
+    dest: /etc/openldap/cacerts/
+    owner: root
+    group: root
+    mode: 0644
+  notify: Restart services
+
+- name: Copy ldap.conf template
+  template:
+    src: etc/openldap/ldap.conf.j2
+    dest: /etc/openldap/ldap.conf
+    owner: root
+    group: root
+    mode: '0644'
+  notify: Restart services
+
+- name: Copy files into pam.d dir
+  copy:
+    src: "{{ item }}"
+    dest: /etc/pam.d/
+    owner: root
+    group: root
+    mode: 0644
+  with_items:
+    - templates/etc/pam.d/system-auth-ac
+    - templates/etc/pam.d/password-auth-ac
+    - templates/etc/pam.d/fingerprint-auth-ac
+    - templates/etc/pam.d/smartcard-auth-ac
+    - templates/etc/pam.d/systemd-user
+    - templates/etc/pam.d/sshd
+  notify: Restart services
+
+- name: Copy files into sudoers.d dir
+  copy:
+    src: "{{ item }}"
+    dest: /etc/sudoers.d/
+    owner: root
+    group: root
+    mode: 0644
+  with_fileglob:
+    - templates/etc/sudoers.d/{{ env }}/*
+
+- name: Copy files into sysconfig dir
+  copy:
+    src: templates/etc/sysconfig/authconfig
+    dest: /etc/sysconfig/
+    owner: root
+    group: root
+    mode: 0644
+  notify: Restart services
+
+- name: Copy files into ssh dir
+  copy:
+    src: templates/etc/ssh/sshd_config
+    dest: /etc/ssh/
+    owner: root
+    group: root
+    mode: 0644
+  notify: Restart services
+
+- name: Copy files into etc dir
+  copy:
+    src: "{{ item }}"
+    dest: /etc/
+    owner: root
+    group: root
+    mode: 0600
+  with_items:
+    - templates/etc/krb5.conf
+    - templates/etc/nsswitch.conf
+  notify: Restart services
+
+- name: Copy nslcd.conf template
+  template:
+    src: etc/nslcd.conf.{{ env }}.j2
+    dest: /etc/nslcd.conf
+    owner: root
+    group: root
+    mode: '0600'
+  notify: Restart services
